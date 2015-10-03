@@ -43,7 +43,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets.cs" />
     <Compile Include="Global.cs" />
+    <Compile Include="PlayState.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -51,10 +53,17 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Otter.TiledLoader\Otter.TiledLoader.csproj">
+      <Project>{d84ec669-0650-4965-8a44-92228b90c6e3}</Project>
+      <Name>Otter.TiledLoader</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\Otter2D\Otter\Otter.csproj">
       <Project>{236485c2-a7ba-4dcd-808a-b3a634764402}</Project>
       <Name>Otter</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Assets\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

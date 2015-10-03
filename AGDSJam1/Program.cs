@@ -22,9 +22,10 @@ namespace AGDSJam1
             Global.controllerPlayerOne.A.AddKey(Otter.Key.Space);
             Global.controllerPlayerOne.X.AddKey(Otter.Key.E);
 
-            
+
             Global.theGame.AddScene(new PlayState());
             Global.theGame.Start();
+            
 
         }
     }
