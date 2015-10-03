@@ -114,7 +114,7 @@ namespace AGDSJam1
             msgBox.Y = 250 + msgBox.Height + 16;
             AddGraphic(msgBox);
 
-            msgText = new RichText("YOU {shake:4}I D I O T", Assets.FONT_MSG, 16, 270, 50);
+            msgText = new RichText("{shake:0.4}Subject awakened.\nFacility status: {color:00ff00}   [OK]\n{color:ffffff}Subject status: {color:00ff00}    [OK]\n{color:ffffff}HERMES-I stability: {color:ff0000}[POOR]", Assets.FONT_MSG, 8, 270, 50);
             msgText.X = 325 - msgBox.HalfWidth;
             msgText.Y = 250 + msgBox.Height - 8;
             msgText.Scroll = 0;
