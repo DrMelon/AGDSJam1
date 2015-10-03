@@ -111,12 +111,12 @@ namespace AGDSJam1
             msgBox.Scroll = 0;
             msgBox.CenterOrigin();
             msgBox.X = 320;
-            msgBox.Y = 240 + msgBox.Height + 16;
+            msgBox.Y = 250 + msgBox.Height + 16;
             AddGraphic(msgBox);
 
             msgText = new RichText("YOU {shake:4}I D I O T", Assets.FONT_MSG, 16, 270, 50);
             msgText.X = 325 - msgBox.HalfWidth;
-            msgText.Y = 240 + msgBox.Height - 8;
+            msgText.Y = 250 + msgBox.Height - 8;
             msgText.Scroll = 0;
             AddGraphic(msgText);
             
@@ -137,7 +137,7 @@ namespace AGDSJam1
             CameraZoom = 2.0f + (((float)Math.Sin(Global.theGame.Timer * 0.01f) * 0.2f) * swayAmt);
             CameraAngle = 0.0f + (((float)Math.Sin(Global.theGame.Timer * 0.02f) * 4.0f) * swayAmt);
 
-            VHSShader.SetParameter("time", Global.theGame.Timer);
+           // VHSShader.SetParameter("time", Global.theGame.Timer);
             VHSShader2.SetParameter("time", Global.theGame.Timer);
 
         }

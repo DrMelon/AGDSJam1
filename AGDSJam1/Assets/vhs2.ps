@@ -15,7 +15,7 @@ void main() {
 
 
 	vec4 pixel = texture2D(texture, pos) * 0.9f;
-	pixel += glowcol * (0.6f + sin(time*0.01f) * 0.5f);
+	pixel += glowcol * (0.6f + sin(time*0.01f+glowpos.y*10.0f) *0.5f);
 
 	gl_FragColor = pixel;
 
