@@ -19,6 +19,48 @@ namespace AGDSJam1
 
         public Speed mySpeed;
 
+        public float HP;
+        public float O2Level;
+        public float Hunger;
+        public bool NoShoes;
+        public bool InsideShip;
+        public bool Dead = false;
+
+        // Fixed Inventory?
+        public int Wrench = 0;
+        public int Boots = 1;
+        public int Crisps = 0;
+        public int Circuit = 0;
+        public int Donut = 0;
+        public int Battery = 0;
+        public int O2Tank = 0;
+        public int FireExtinguisher = 0;
+        public int FloorTile = 0;
+
+
+
+        public int SelectedItem = 0; // 0 = hands
+
+        // Inventory Images
+        Image hand;
+        Image boots;
+        Image circuit;
+        Image wrench;
+        Image crisps;
+        Image donut;
+        Image o2tank;
+        Image fireextinguisher;
+        Image battery;
+        Image tiles;
+
+
+        // leftmouse : use
+        // e: pick up, inspect
+        // q: radial menu
+
+        public bool RenderRadial = false;
+
+
         public Player(float x, float y)
         {
             
@@ -33,20 +75,112 @@ namespace AGDSJam1
             AddGraphic(mySprite);
             mySpeed = new Speed(5);
 
+            // Load inventory images
+            hand = new Image(Assets.GFX_HAND);
+            boots = new Image(Assets.GFX_BOOTS);
+            circuit = new Image(Assets.GFX_CIRCUIT);
+            wrench = new Image(Assets.GFX_WRENCH);
+            crisps = new Image(Assets.GFX_CRISPS);
+            donut = new Image(Assets.GFX_DONUT);
+            o2tank = new Image(Assets.GFX_O2TANK);
+            fireextinguisher = new Image(Assets.GFX_EXTINGUISHER);
+            battery = new Image(Assets.GFX_BATTERY);
+            tiles = new Image(Assets.GFX_TILE);
+
+
+
             AddCollider(new CircleCollider(8, 2));
             Collider.CenterOrigin();
 
             crossHair = new Entity(X, Y, new Image(Assets.XHAIR));
             crossHair.Graphic.CenterOrigin();
-            
+
+
+            // Default vars
+            NoShoes = false;
+            HP = 100;
+            O2Level = 100;
+            Hunger = 0;
+            InsideShip = true;
+
         }
 
         public void HandleInput()
         {
             myController = Global.thePlayerSession.GetController<ControllerXbox360>();
             Vector2 moveDelta = new Vector2();
-            moveDelta.X = myController.LeftStick.X * 0.1f;
-            moveDelta.Y = myController.LeftStick.Y * 0.1f;
+            if(InsideShip)
+            {
+                moveDelta.X = myController.LeftStick.X * 0.1f;
+                moveDelta.Y = myController.LeftStick.Y * 0.1f;
+            }
+
+            // if LB down, render radial menu
+            RenderRadial = myController.LB.Down;
+
+            // if use item key is pressed, use an item -- select from radial if radial is used
+            if (myController.X.Pressed)
+            {
+                // Check for radial, select if it's on.
+                if (RenderRadial)
+                {
+                    // get crosshair angle
+                    Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
+                    directionToXHair.Normalize();
+                    float AtanResult = (float)Math.Atan2(directionToXHair.X, directionToXHair.Y);
+                    if (AtanResult < 0)
+                    {
+                        AtanResult += 2 * (float)Math.PI;
+                    }
+                    float Ang = MathHelper.ToDegrees(AtanResult);
+                    Otter.Debugger.Instance.Log(Ang);
+                    // Get closest to ang
+                    float res = Ang / 360.0f;
+                    Otter.Debugger.Instance.Log(res * 10);
+                    int index = (int)Math.Round(res * 10);
+
+                    if(index == 10)
+                    {
+                        index = 0;
+                    }
+                    SelectedItem = index;
+                }
+                else
+                {
+                    // use the currently-held item
+                    switch (SelectedItem)
+                    {
+                        case 0:
+                            // Hands - Used to inspect an object.
+                            // Check for inspection target nearby, inspecting if necessary.
+                            // Pick up other items if there is room. 
+
+                            break;
+                        default:
+                            //nada
+                            break;
+                    }
+                }
+
+            }
+
+            // Item is thrown away or hands strike object
+            if(myController.B.Pressed)
+            {
+                switch(SelectedItem)
+                {
+                    case 0:
+                        // Percussive force! Wham!
+                        // Check for machine, shorten break  time.
+                        // If vending machine, chance to vend item instead of hurting it. 80% chance. 
+
+
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             
             MoveInDirection(moveDelta);
 
@@ -62,13 +196,20 @@ namespace AGDSJam1
             
             if (Math.Abs(moveDelta.X) <= 0.1)
             {
-                mySpeed.X *= 0.92f;
+                if (InsideShip)
+                {
+                    mySpeed.X *= 0.92f;
+                }
 
             }
             
             if (Math.Abs(moveDelta.Y) <= 0.1)
             {
-                mySpeed.Y *= 0.92f;
+                if(InsideShip)
+                {
+                    mySpeed.Y *= 0.92f;
+                }
+                
             }
 
 
@@ -79,6 +220,9 @@ namespace AGDSJam1
             base.Update();
 
             HandleInput();
+
+            // not on floor, not inside!
+            InsideShip = Overlap(X, Y, 8);
 
             if (Overlap(X + mySpeed.X, Y + mySpeed.Y, 3))
             {
@@ -92,12 +236,13 @@ namespace AGDSJam1
                     mySpeed.Y = 0;
                 }
 
+                InsideShip = true;
+
             }
-           // else
-           // {
-                X += mySpeed.X;
-                Y += mySpeed.Y;
-           // }
+
+            X += mySpeed.X;
+            Y += mySpeed.Y;
+ 
 
             crossHair.X = X + (Input.GameMouseX - 320) / 2;
             crossHair.Y = Y + (Input.GameMouseY - 240) / 2;
@@ -128,6 +273,104 @@ namespace AGDSJam1
             {
                 mySprite.Play("idle");
             }
+
+            
+
+        }
+
+        public override void Render()
+        {
+            base.Render();
+
+            // if radial is open, render it
+            if (RenderRadial)
+            {
+                for(int i = 0; i < 10; i++)
+                {
+                    // Draw boxes, then items
+                    float Ang = (float)i / 10.0f * 360.0f;
+                    Ang = MathHelper.ToRadians(Ang);
+                    Vector2 newPos = new Vector2((float)Math.Sin(Ang) * 50.0f, (float)Math.Cos(Ang) * 50.0f);
+                    newPos.X += X;
+                    newPos.Y += Y;
+                    
+                    if(SelectedItem == i)
+                    {
+                        Draw.Line(X, Y, newPos.X, newPos.Y, Color.Yellow);
+                        Draw.Rectangle(newPos.X - 8, newPos.Y - 8, 16, 16, Color.Gray, Color.Yellow, 1);
+                    }
+                    else
+                    {
+                        Draw.Line(X, Y, newPos.X, newPos.Y, Color.White);
+                        Draw.Rectangle(newPos.X - 8, newPos.Y - 8, 16, 16, Color.Black, Color.White, 1);
+                    }
+                    
+                    // render images
+                    if(i == 0)
+                    {
+                        hand.X = newPos.X - 8;
+                        hand.Y = newPos.Y - 8;
+                        hand.Render();
+                    }
+                    if (i == 1 && Boots > 0)
+                    {
+                        boots.X = newPos.X - 8;
+                        boots.Y = newPos.Y - 8;
+                        boots.Render();
+                    }
+                    if (i == 2 && Circuit > 0)
+                    {
+                        circuit.X = newPos.X - 8;
+                        circuit.Y = newPos.Y - 8;
+                        circuit.Render();
+                    }
+                    if (i == 3 && FloorTile > 0)
+                    {
+                        tiles.X = newPos.X - 8;
+                        tiles.Y = newPos.Y - 8;
+                        tiles.Render();
+                    }
+                    if (i == 4 && Wrench > 0)
+                    {
+                        wrench.X = newPos.X - 8;
+                        wrench.Y = newPos.Y - 8;
+                        wrench.Render();
+                    }
+                    if (i == 5 && Battery > 0)
+                    {
+                        battery.X = newPos.X - 8;
+                        battery.Y = newPos.Y - 8;
+                        battery.Render();
+                    }
+                    if (i == 6 && Donut > 0)
+                    {
+                        donut.X = newPos.X - 8;
+                        donut.Y = newPos.Y - 8;
+                        donut.Render();
+                    }
+                    if (i == 7 && Crisps > 0)
+                    {
+                        crisps.X = newPos.X - 8;
+                        crisps.Y = newPos.Y - 8;
+                        crisps.Render();
+                    }
+                    if (i == 8 && FireExtinguisher > 0)
+                    {
+                        fireextinguisher.X = newPos.X - 8;
+                        fireextinguisher.Y = newPos.Y - 8;
+                        fireextinguisher.Render();
+                    }
+                    if (i == 9 && O2Tank > 0)
+                    {
+                        o2tank.X = newPos.X - 8;
+                        o2tank.Y = newPos.Y - 8;
+                        o2tank.Render();
+                    }
+
+
+                }
+            }
+            
         }
 
 

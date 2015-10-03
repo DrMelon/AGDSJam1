@@ -24,17 +24,35 @@ namespace AGDSJam1
         Tilemap floorTiles;
         Tilemap wallTiles;
         GridCollider wallCollision;
+        GridCollider floorCollision;
         Entity wallTest;
+        Entity floorTest;
 
         float swayAmt = 1.0f;
+
+        // Shaders
+        Shader VHSShader;
+        Shader VHSShader2;
 
         // Player
         Player thePlayer;
 
+        // HUD
+        Image msgBox;
+        RichText msgText;
+        // we need text-reveal mode or sth. edit richtext?
+        
+        
+          
+
         public PlayState()
         {
 
-
+            //Load shader
+            VHSShader = new Shader(ShaderType.Fragment, Assets.VHS_SHADER);
+            VHSShader2 = new Shader(ShaderType.Fragment, Assets.VHS_SHADER2);
+            Global.theGame.Surface.AddShader(VHSShader);
+            Global.theGame.Surface.AddShader(VHSShader2);
 
             // Create starfield.
             starFieldFar = new Image(Assets.GFX_STARFIELD);
@@ -63,6 +81,7 @@ namespace AGDSJam1
 
             // Make sure walls have the correct tiles    
             wallCollision = mapProject.CreateGridCollider((TiledTileLayer)mapProject.Layers[1], 3);
+            floorCollision = mapProject.CreateGridCollider((TiledTileLayer)mapProject.Layers[0], 8);
 
             // Move camera to start point
             TiledObjectGroup mapObjects = (TiledObjectGroup)mapProject.Layers[2];
@@ -84,6 +103,23 @@ namespace AGDSJam1
 
             wallTest = new Entity(0, 0, null, wallCollision);
             Add(wallTest);
+            floorTest = new Entity(0, 0, null, floorCollision);
+            Add(floorTest);
+
+            // Add hud
+            msgBox = new Image(Assets.GFX_HUD);
+            msgBox.Scroll = 0;
+            msgBox.CenterOrigin();
+            msgBox.X = 320;
+            msgBox.Y = 240 + msgBox.Height + 16;
+            AddGraphic(msgBox);
+
+            msgText = new RichText("YOU {shake:4}I D I O T", Assets.FONT_MSG, 16, 270, 50);
+            msgText.X = 325 - msgBox.HalfWidth;
+            msgText.Y = 240 + msgBox.Height - 8;
+            msgText.Scroll = 0;
+            AddGraphic(msgText);
+            
 
         }
 
@@ -100,6 +136,9 @@ namespace AGDSJam1
             // bounce zoom?
             CameraZoom = 2.0f + (((float)Math.Sin(Global.theGame.Timer * 0.01f) * 0.2f) * swayAmt);
             CameraAngle = 0.0f + (((float)Math.Sin(Global.theGame.Timer * 0.02f) * 4.0f) * swayAmt);
+
+            VHSShader.SetParameter("time", Global.theGame.Timer);
+            VHSShader2.SetParameter("time", Global.theGame.Timer);
 
         }
 

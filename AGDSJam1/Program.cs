@@ -19,8 +19,12 @@ namespace AGDSJam1
             Global.controllerPlayerOne = Global.thePlayerSession.GetController<ControllerXbox360>();
             Global.controllerPlayerOne.LeftStick.AddKeys(new Key[] { Otter.Key.W, Otter.Key.D, Otter.Key.S, Otter.Key.A });
             Global.controllerPlayerOne.Start.AddKey(Otter.Key.Return);
-            Global.controllerPlayerOne.A.AddKey(Otter.Key.Space);
-            Global.controllerPlayerOne.X.AddKey(Otter.Key.E);
+            // radial
+            Global.controllerPlayerOne.LB.AddKey(Otter.Key.Q);
+            // use/grab/inspect
+            Global.controllerPlayerOne.X.AddMouseButton(Otter.MouseButton.Left);
+            // throw/hit
+            Global.controllerPlayerOne.B.AddMouseButton(Otter.MouseButton.Right);
 
 
             Global.theGame.AddScene(new PlayState());

@@ -14,5 +14,21 @@ namespace AGDSJam1
         public static string MAP_STATION = "../../Assets/map.tmx";
         public static string GFX_PLAYER = "../../Assets/player.png";
         public static string XHAIR = "../../Assets/crosshair.png";
+        public static string VHS_SHADER = "../../Assets/vhs.ps";
+        public static string VHS_SHADER2 = "../../Assets/vhs2.ps";
+        public static string FONT_MSG = "../../Assets/font.ttf";
+        public static string GFX_HUD = "../../Assets/msgs.png";
+
+        public static string GFX_BATTERY = "../../Assets/battery.png";
+        public static string GFX_CIRCUIT = "../../Assets/circuit.png";
+        public static string GFX_BOOTS = "../../Assets/boots.png";
+        public static string GFX_DONUT = "../../Assets/donut.png";
+        public static string GFX_EXTINGUISHER = "../../Assets/extinguisher.png";
+        public static string GFX_HAND = "../../Assets/hand.png";
+        public static string GFX_O2TANK = "../../Assets/o2.png";
+        public static string GFX_TILE = "../../Assets/tile.png";
+        public static string GFX_CRISPS = "../../Assets/wongers.png";
+        public static string GFX_WRENCH = "../../Assets/wrench.png";
+
     }
 }

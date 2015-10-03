@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="Assets.cs" />
     <Compile Include="Global.cs" />
+    <Compile Include="Machine.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="PlayState.cs" />
     <Compile Include="Program.cs" />
@@ -52,6 +53,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Assets\vhs2.ps" />
+    <None Include="Assets\vhs.ps" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Otter.TiledLoader\Otter.TiledLoader.csproj">
@@ -63,9 +66,7 @@
       <Name>Otter</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Assets\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
