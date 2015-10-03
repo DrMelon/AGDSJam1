@@ -24,9 +24,12 @@ namespace AGDSJam1
         Tilemap floorTiles;
         Tilemap wallTiles;
         GridCollider wallCollision;
+        Entity wallTest;
+
+        float swayAmt = 1.0f;
 
         // Player
-
+        Player thePlayer;
 
         public PlayState()
         {
@@ -58,14 +61,8 @@ namespace AGDSJam1
             floorTiles = mapProject.CreateTilemap((TiledTileLayer)mapProject.Layers[0]);
             wallTiles = mapProject.CreateTilemap((TiledTileLayer)mapProject.Layers[1], mapProject.TileSets[1]);
 
-            // Make sure walls have the correct tiles
-            
-
+            // Make sure walls have the correct tiles    
             wallCollision = mapProject.CreateGridCollider((TiledTileLayer)mapProject.Layers[1], 3);
-
-            // Create station
-            AddGraphic(floorTiles);
-            AddGraphic(wallTiles);
 
             // Move camera to start point
             TiledObjectGroup mapObjects = (TiledObjectGroup)mapProject.Layers[2];
@@ -73,6 +70,21 @@ namespace AGDSJam1
 
             CameraX = strt.X - 320;
             CameraY = strt.Y - 240;
+
+            // Add player
+            thePlayer = new Player(strt.X, strt.Y);
+
+
+            // Add station & player to scene
+            
+            AddGraphic(floorTiles);
+            Add(thePlayer);
+            AddGraphic(wallTiles);
+            Add(thePlayer.crossHair);
+
+            wallTest = new Entity(0, 0, null, wallCollision);
+            Add(wallTest);
+
         }
 
 
@@ -86,14 +98,15 @@ namespace AGDSJam1
             starFieldClose.X -= 1.0f;
 
             // bounce zoom?
-            CameraZoom = 1.8f + (float)Math.Sin(Global.theGame.Timer * 0.01f) * 0.2f;
-            CameraAngle = 0.0f + (float)Math.Sin(Global.theGame.Timer * 0.02f) * 4.0f;
+            CameraZoom = 2.0f + (((float)Math.Sin(Global.theGame.Timer * 0.01f) * 0.2f) * swayAmt);
+            CameraAngle = 0.0f + (((float)Math.Sin(Global.theGame.Timer * 0.02f) * 4.0f) * swayAmt);
 
         }
 
         public override void UpdateLast()
         {
             base.UpdateLast();
+            CenterCamera(thePlayer.X, thePlayer.Y);
         }
 
         public override void Render()

@@ -24,6 +24,7 @@ namespace AGDSJam1
 
 
             Global.theGame.AddScene(new PlayState());
+            Global.theGame.LockMouseCenter = true;
             Global.theGame.Start();
             
 

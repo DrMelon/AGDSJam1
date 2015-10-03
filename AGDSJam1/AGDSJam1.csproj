@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="Assets.cs" />
     <Compile Include="Global.cs" />
+    <Compile Include="Player.cs" />
     <Compile Include="PlayState.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

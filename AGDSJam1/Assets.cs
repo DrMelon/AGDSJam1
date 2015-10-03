@@ -12,5 +12,7 @@ namespace AGDSJam1
         public static string SPRITE_TEST = "../../Assets/test.png";
         public static string GFX_STARFIELD = "../../Assets/starfield.png";
         public static string MAP_STATION = "../../Assets/map.tmx";
+        public static string GFX_PLAYER = "../../Assets/player.png";
+        public static string XHAIR = "../../Assets/crosshair.png";
     }
 }
