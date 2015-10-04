@@ -59,7 +59,10 @@ namespace AGDSJam1
         // q: radial menu
 
         public bool RenderRadial = false;
-
+        public Machine inspectMachine = null;
+        public bool RenderDetail = false;
+        public float InspectTime = 300;
+        public float StartInspect;
 
         public Player(float x, float y)
         {
@@ -87,7 +90,7 @@ namespace AGDSJam1
             battery = new Image(Assets.GFX_BATTERY);
             tiles = new Image(Assets.GFX_TILE);
 
-
+            StartInspect = Global.theGame.Timer;
 
             AddCollider(new CircleCollider(8, 2));
             Collider.CenterOrigin();
@@ -146,6 +149,8 @@ namespace AGDSJam1
                         index = 0;
                     }
                     SelectedItem = index;
+
+
                 }
                 else
                 {
@@ -155,6 +160,29 @@ namespace AGDSJam1
                         case 0:
                             // Hands - Used to inspect an object.
                             // Check for inspection target nearby, inspecting if necessary.
+                            if (crossHair.Overlap(crossHair.X, crossHair.Y, 6))
+                            {
+                                //machine, display text in box.
+                                Collider target = crossHair.Collide(crossHair.X, crossHair.Y, 6);
+                                if (target.Entity.GetType().Name == "Machine")
+                                {
+                                    Machine theMachine = (Machine)target.Entity;
+                                    Global.ResetBox = true;
+                                    Global.MsgString = theMachine.Name + ":\n" + theMachine.Description;
+                                    if(theMachine.Status == 2)
+                                    {
+                                        Global.MsgString += "\n" + theMachine.FlavBroke;
+                                    }
+                                    if(theMachine.Status == 3)
+                                    {
+                                        Global.MsgString += "\n" + theMachine.FlavFixing;
+                                    }
+
+                                    inspectMachine = theMachine;
+                                    RenderDetail = true;
+                                    StartInspect = Global.theGame.Timer;
+                                }
+                            }
                             // Pick up other items if there is room. 
                             if(crossHair.Overlap(crossHair.X, crossHair.Y, 1))
                             {
@@ -580,6 +608,34 @@ namespace AGDSJam1
         public override void Render()
         {
             base.Render();
+            // if inspect is open, render it
+            if (RenderDetail && inspectMachine != null)
+            {
+                if(Global.theGame.Timer >= InspectTime + StartInspect)
+                {
+                    RenderDetail = false;
+                }
+
+                // Draw 64x64 box at right edge
+                Draw.Rectangle(X + 30, Y - 30, 64, 64, Color.Black, Color.White, 1);
+                // Draw Image
+                if(inspectMachine.Status == 1)
+                {
+                    inspectMachine.gfxDetail.Play("normal");
+                }
+                if (inspectMachine.Status == 2)
+                {
+                    inspectMachine.gfxDetail.Play("broken");
+                }
+                if (inspectMachine.Status == 3)
+                {
+                    inspectMachine.gfxDetail.Play("fixing");
+                }
+                inspectMachine.gfxDetail.X = 30 + X;
+                inspectMachine.gfxDetail.Y = Y - 30;
+                inspectMachine.gfxDetail.Render();
+            }
+
 
             // if radial is open, render it
             if (RenderRadial)

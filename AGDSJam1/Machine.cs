@@ -9,14 +9,15 @@ namespace AGDSJam1
     class Machine : Entity
     {
         Spritemap<string> gfxTop;
-        Spritemap<string> gfxDetail;
-        string Name;
-        string Description;
-        string FlavBroke;
-        string FlavFixing;
+        public Spritemap<string> gfxDetail;
+        public string Name;
+        public string Description;
+        public string FlavBroke;
+        public string FlavFixing;
         float FixTime;
         float BreakTime;
-        int Status;
+        float CurTime;
+        public int Status;
         bool BeingInspected;
 
         public Machine(float x, float y, string machineName, string description, string flav_broke, string flav_fixin, float fixtime, string asset_top, string asset_detail)
@@ -36,17 +37,19 @@ namespace AGDSJam1
             FlavFixing = flav_fixin;
             BreakTime = Rand.Float(60 * 5, 60 * 60);
             FixTime = fixtime;
-
+            AddGraphic(gfxTop);
+            Graphic.CenterOrigin();
             Status = 1;
-            
+            CurTime = Global.theGame.Timer;
+            Layer = 31;
+
+            AddCollider(new BoxCollider(32, 32, 6));
+            Collider.CenterOrigin();
+
+
         }
 
-        public void Inspect()
-        {
-            // Create window for detail view and text box.
-
-            // Display detail view and text box.
-        }
+        
 
         public void BeginFix()
         {
@@ -59,6 +62,29 @@ namespace AGDSJam1
             Status = 2;
         }
 
+        public override void Update()
+        {
+            base.Update();
+            if(Status == 1)
+            {
+                if(Global.theGame.Timer >= CurTime + BreakTime)
+                {
+                    Break();
+                    CurTime = Global.theGame.Timer;
+                    BreakTime = Rand.Float(60 * 5, 60 * 60);
+                }
+                
+
+            }
+            if(Status == 3)
+            {
+                if(Global.theGame.Timer >= CurTime + FixTime)
+                {
+                    Status = 1;
+                    CurTime = Global.theGame.Timer;
+                }
+            }
+        }
 
     }
 }

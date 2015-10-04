@@ -29,6 +29,8 @@ namespace AGDSJam1
         public static string GFX_TILE = "../../Assets/tile.png";
         public static string GFX_CRISPS = "../../Assets/wongers.png";
         public static string GFX_WRENCH = "../../Assets/wrench.png";
+        public static string GFX_MACHINETOP = "../../Assets/machinefromabove.png";
+        public static string GFX_VENDING = "../../Assets/vendingmachine.png";
 
     }
 }

@@ -40,6 +40,8 @@ namespace AGDSJam1
         // HUD
         Image msgBox;
         RichText msgText;
+        int msgCurrentChar;
+        int bip;
         // we need text-reveal mode or sth. edit richtext?
         
         
@@ -105,7 +107,7 @@ namespace AGDSJam1
             AddGraphic(floorTiles);
             Add(thePlayer);
 
-            // Make items
+            // Make items / machines
             for (int i = 0; i < mapObjects.Objects.Count; i++)
             {
                 TiledObject curObj = mapObjects.Objects[i];
@@ -113,6 +115,11 @@ namespace AGDSJam1
                 {
                     Item newWrench = new Item(curObj.X, curObj.Y, 4);
                     Add(newWrench);
+                }
+                if (curObj.Name == "VendingMachine")
+                {
+                    Machine newMachine = new Machine(curObj.X, curObj.Y, "Vending Machine", "Full of delicious snacks.", "Looks like it's busted.", "It's rebooting.", 60, Assets.GFX_MACHINETOP, Assets.GFX_VENDING);
+                    Add(newMachine);
                 }
             }
 
@@ -129,7 +136,7 @@ namespace AGDSJam1
             msgBox.Scroll = 0;
             msgBox.CenterOrigin();
             msgBox.X = 320;
-            msgBox.Y = 250 + msgBox.Height + 16;
+            msgBox.Y = 255 + msgBox.Height + 16;
             Entity hud1 = new Entity();
         
             hud1.AddGraphic(msgBox);
@@ -141,7 +148,7 @@ namespace AGDSJam1
             msgText.DefaultShakeX = 0.4f;
             msgText.DefaultShakeY = 0.4f;
             msgText.X = 325 - msgBox.HalfWidth;
-            msgText.Y = 250 + msgBox.Height - 8;
+            msgText.Y = 255 + msgBox.Height - 8;
             msgText.Scroll = 0;
             msgText.String = "Subject awakened.";
             Entity hud2 = new Entity();
@@ -169,6 +176,23 @@ namespace AGDSJam1
 
            // VHSShader.SetParameter("time", Global.theGame.Timer);
             VHSShader2.SetParameter("time", Global.theGame.Timer);
+            
+            if (Global.ResetBox)
+            {
+                Global.ResetBox = false;
+                msgText.String = "";
+                msgCurrentChar = 0;
+                bip = 0;
+            }
+            
+            if(msgCurrentChar < Global.MsgString.Length && bip == 0)
+            {
+                bip = 2;
+                msgText.String += Global.MsgString[msgCurrentChar];
+                msgCurrentChar++;
+            }
+
+            bip--;
 
         }
 

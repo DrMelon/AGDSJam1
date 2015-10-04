@@ -86,16 +86,16 @@ namespace AGDSJam1
                 mySpeed.Y *= 0.92f;
             }
 
-            if (Overlap(X + mySpeed.X, Y + mySpeed.Y, 3))
+            if (Overlap(X + mySpeed.X, Y + mySpeed.Y, 3) || Overlap(X + mySpeed.X, Y + mySpeed.Y, 6))
             {
                 //try just xspeed
-                if (Overlap(X + mySpeed.X, Y, 3))
+                if (Overlap(X + mySpeed.X, Y, 3) || Overlap(X + mySpeed.X, Y, 6))
                 {
                     mySpeed.X = -mySpeed.X;
                 }
-                if (Overlap(X, mySpeed.Y + Y, 3))
+                if (Overlap(X, mySpeed.Y + Y, 3) || Overlap(X + mySpeed.X, Y, 6))
                 {
-                    mySpeed.Y = mySpeed.Y;
+                    mySpeed.Y = -mySpeed.Y;
                 }
 
             }
