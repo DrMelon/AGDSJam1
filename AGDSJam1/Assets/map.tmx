@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="200" height="200" tilewidth="32" tileheight="32" nextobjectid="27">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="200" height="200" tilewidth="32" tileheight="32" nextobjectid="29">
  <tileset firstgid="1" name="Floor" tilewidth="32" tileheight="32" tilecount="400">
   <image source="floor.png" width="640" height="640"/>
  </tileset>
@@ -25,11 +25,13 @@
   <object id="13" name="Airlock4" type="AirlockVert" x="3712.08" y="1664" width="32" height="64"/>
   <object id="15" name="SolarN" type="Solars" x="3396" y="1602" width="254" height="59"/>
   <object id="18" name="SolarS" type="Solars" x="3394" y="1729" width="252" height="63"/>
-  <object id="19" name="Tankrefiller" type="Tankrefiller" x="3180" y="1792" width="32" height="32"/>
+  <object id="19" name="Tankrefiller" type="Tankrefiller" x="3171" y="1779" width="32" height="32"/>
   <object id="20" name="Powercell" type="Powercell" x="2986" y="1879" width="32" height="32"/>
   <object id="21" name="Computer" type="Computer" x="3935" y="1567" width="32" height="32"/>
   <object id="22" name="Comsat" type="Comsat" x="3874" y="1438" width="56" height="67"/>
   <object id="25" name="Airlock5" type="AirlockVert" x="3840" y="1792" width="32" height="64"/>
   <object id="26" name="Wrench" type="Wrench" x="3051" y="1793" width="16" height="16"/>
+  <object id="27" name="Crisps" type="Crisps" x="3895" y="1587" width="16" height="16"/>
+  <object id="28" name="Donut" type="Donut" x="2814" y="1579" width="16" height="16"/>
  </objectgroup>
 </map>

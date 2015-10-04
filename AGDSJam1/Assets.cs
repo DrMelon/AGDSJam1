@@ -18,7 +18,8 @@ namespace AGDSJam1
         public static string VHS_SHADER2 = "../../Assets/vhs2.ps";
         public static string FONT_MSG = "../../Assets/font.ttf";
         public static string GFX_HUD = "../../Assets/msgs.png";
-
+        public static string GFX_PC_TOP = "../../Assets/pc.png";
+        public static string GFX_PC_FRONT = "../../Assets/pc_front.png";
         public static string GFX_BATTERY = "../../Assets/battery.png";
         public static string GFX_CIRCUIT = "../../Assets/circuit.png";
         public static string GFX_BOOTS = "../../Assets/boots.png";

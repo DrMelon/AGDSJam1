@@ -224,6 +224,7 @@ namespace AGDSJam1
                                                 if (Boots < 1)
                                                 {
                                                     theItem.RemoveSelf();
+                                                    Global.NewWords("You grab the boots.\nYou wear the boots.\nThey look ridiculous.");
                                                     Boots = 1;
 
 
@@ -261,6 +262,7 @@ namespace AGDSJam1
                                                 if (Wrench < 1)
                                                 {
                                                     theItem.RemoveSelf();
+                                                    Global.NewWords("You picked up the wrench.\nUse this to fix machines!");
                                                     Wrench = 1;
 
                                                 }
@@ -286,7 +288,7 @@ namespace AGDSJam1
                                                 {
                                                     theItem.RemoveSelf();
                                                     Donut = 1;
-
+                                                    Global.NewWords("You get the donut-shaped nutriment\nsupplement. It's got real icing!\nThat's the only real thing about it.");
                                                 }
                                                 else
                                                 {
@@ -298,7 +300,7 @@ namespace AGDSJam1
                                                 {
                                                     theItem.RemoveSelf();
                                                     Crisps = 1;
-
+                                                    Global.NewWords("You pick up the 'Golden Wonger'\nbrand potato crisps. It says\n'potabo chisps' on the packet.\nNothing to worry about?");
                                                 }
                                                 else
                                                 {
@@ -338,15 +340,49 @@ namespace AGDSJam1
 
                                 break;
                             case 1:
-                                Global.NewWords("You grip your shoes like an idiot.");
+                                if (Boots < 1)
+                                {
+                                    Global.NewWords("You aren't wearing your boots\nanymore. Your socks are terrible.");
+                                }
+                                else
+                                {
+                                    Global.NewWords("You touch your toes.\nIt's good to stay in shape.\nBack to work!");
+                                }
+
                                 break;
                             case 2:
-                                Global.NewWords("You hug the circuit board.\n It feels better.");
+                                if (Circuit > 0)
+                                {
+                                    Global.NewWords("You hug the circuit board.\n It feels better.");
+                                }
                                 break;
                             case 3:
-                                Global.NewWords("These tiles weren't designed to\n be torn out of the flooring.");
+                                if (FloorTile > 0)
+                                {
+                                    Global.NewWords("These tiles weren't designed to\n be torn out of the flooring.");
+                                }
+                                break;
+                            case 6:
+                                if ( Donut > 0)
+                                {
+                                    Donut = 0;
+                                    Global.NewWords("You consume the donut-like object.\nIt fills you with purpose.");
+                                }
+                                break;
+                            case 7:
+                                if ( Crisps > 0)
+                                {
+                                    Crisps = 0;
+                                    Dead = true;
+                                    Global.NewWords("Golden Wongers are a kind of \ngalactic shapeshifting parasite.\nYou died.\n'Potabo chisps'? Really?\n[Press P to Restart]");
+                                }
                                 break;
                             case 4:
+                                if (Wrench < 1)
+                                {
+                                    break;
+                                }
+
                                 // wrench, fix things
                                 // Check for inspection target nearby, inspecting if necessary.
                                 if (crossHair.Overlap(crossHair.X, crossHair.Y, 6))
@@ -362,6 +398,10 @@ namespace AGDSJam1
                                             if (theMachine.Name == "Vending Machine")
                                             {
                                                 Global.NewWords("You set the machine to reboot.\nIt'll vend itself some new glass.");
+                                            }
+                                            if (theMachine.Name == "Computer")
+                                            {
+                                                Global.NewWords("It was just a screensaver.\nYou idiot.");
                                             }
                                         }
                                         else
@@ -420,6 +460,8 @@ namespace AGDSJam1
                                     mySpeed.Y = -directionToXHair.Y;
                                 }
                                 SelectedItem = 0;
+                                Global.NewWords("You kick off your boots.\nIt's pretty slidy in your socks.");
+
                             }
                             // ... i know you ain't goin anywhere
                             break;
@@ -477,6 +519,7 @@ namespace AGDSJam1
                                     mySpeed.Y = -directionToXHair.Y;
                                 }
                                 SelectedItem = 0;
+                                Global.NewWords("You throw away your only means\nof survival.");
                             }
                             // ... i know you ain't goin anywhere
                             break;
@@ -515,6 +558,7 @@ namespace AGDSJam1
                                     mySpeed.Y = -directionToXHair.Y;
                                 }
                                 SelectedItem = 0;
+                                Global.NewWords("You throw the donut-type object\naway. It shines like plastic.");
                             }
                             // ... i know you ain't goin anywhere
                             break;
@@ -534,6 +578,7 @@ namespace AGDSJam1
                                     mySpeed.Y = -directionToXHair.Y;
                                 }
                                 SelectedItem = 0;
+                                Global.NewWords("You toss away the 'chisps'.\nNik-Naks are better anyway.");
                             }
                             // ... i know you ain't goin anywhere
                             break;
@@ -597,7 +642,14 @@ namespace AGDSJam1
             {
                 if (InsideShip)
                 {
-                    mySpeed.X *= 0.92f;
+                    if (Boots > 0)
+                    {
+                        mySpeed.X *= 0.92f;
+                    }
+                    else
+                    {
+                        mySpeed.X *= 0.97f;
+                    }
                 }
 
             }
@@ -606,7 +658,14 @@ namespace AGDSJam1
             {
                 if(InsideShip)
                 {
-                    mySpeed.Y *= 0.92f;
+                    if (Boots > 0)
+                    {
+                        mySpeed.Y *= 0.92f;
+                    }
+                    else
+                    {
+                        mySpeed.Y *= 0.97f;
+                    }
                 }
                 
             }
@@ -636,7 +695,7 @@ namespace AGDSJam1
             if(howLongOutside > 600 && !Dead)
             {
                 Dead = true;
-                Global.NewWords("Drifting endlessly among the stars,\nyou wonder what life had in store\nhad you not been...\n. . . . . . . . . . . . . . .\nan idiot.");
+                Global.NewWords("Drifting endlessly among the stars,\nyou wonder what life had in store\nhad you not been...\n. . . . . . . . . . . . . . .\nan idiot.\n [Press P to Restart.]");
             }
 
             if (Overlap(X + mySpeed.X, Y + mySpeed.Y, 3))

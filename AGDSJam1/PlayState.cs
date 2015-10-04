@@ -116,9 +116,24 @@ namespace AGDSJam1
                     Item newWrench = new Item(curObj.X, curObj.Y, 4);
                     Add(newWrench);
                 }
+                if (curObj.Name == "Crisps")
+                {
+                    Item newWrench = new Item(curObj.X, curObj.Y, 7);
+                    Add(newWrench);
+                }
+                if (curObj.Name == "Donut")
+                {
+                    Item newWrench = new Item(curObj.X, curObj.Y, 6);
+                    Add(newWrench);
+                }
                 if (curObj.Name == "VendingMachine")
                 {
                     Machine newMachine = new Machine(curObj.X, curObj.Y, "Vending Machine", "Full of delicious snacks.", "Looks like it's busted.", "It's rebooting.", 300, Assets.GFX_MACHINETOP, Assets.GFX_VENDING);
+                    Add(newMachine);
+                }
+                if (curObj.Name == "Computer")
+                {
+                    Machine newMachine = new Machine(curObj.X, curObj.Y, "Computer", "The communications terminal... me.", "ERROR: HHHH\nhelp\n \n{color:ff0000}ERRCODE#391293EFF3{color:ffffff}", "It was just a screensaver.\nYou idiot.", 600, Assets.GFX_PC_TOP, Assets.GFX_PC_FRONT);
                     Add(newMachine);
                 }
                 if (curObj.Type == "AirlockVert")
@@ -162,7 +177,7 @@ namespace AGDSJam1
             msgText.X = 325 - msgBox.HalfWidth;
             msgText.Y = 255 + msgBox.Height - 8;
             msgText.Scroll = 0;
-            msgText.String = "Subject awakened.";
+            msgText.String = "";
             Entity hud2 = new Entity();
 
             hud2.AddGraphic(msgText);
@@ -214,11 +229,25 @@ namespace AGDSJam1
                     if (!thePlayer.Dead)
                     {
                         thePlayer.Dead = true;
-                        Global.NewWords("You neglected to fix the machines.\nThey were all vital to life support.\nEven the vending machine.");
+                        Global.NewWords("You neglected to fix the machines.\nThey were all vital to life support.\nEven the vending machine.\n [Press P to Restart.]");
                     }
                 }
             }
 
+            if(Input.KeyPressed(Key.P))
+            {
+                ResetGame();
+            }
+
+        }
+
+        public void ResetGame()
+        {
+            Global.MachineBroken = false;
+            Global.MachineBrokenTime = 0;
+            Global.MsgString = "You wake up.\nPress W, S, A, D to move.\nInteract / Use Item with Left Mouse\nThrow Item with Right Mouse.\nRepair your machines!";
+            Global.theGame.Surface.ClearShaders();
+            Global.theGame.SwitchScene(new PlayState());
         }
 
         public override void UpdateLast()

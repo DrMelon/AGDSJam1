@@ -57,7 +57,9 @@ namespace AGDSJam1
             {
                 Status = 3;
             }
-            
+            CurTime = Global.theGame.Timer;
+            Global.MachineBroken = false;
+            Global.MachineBrokenTime -= 60 * 60 * 0.2f;
 
         }
 
@@ -76,8 +78,11 @@ namespace AGDSJam1
                     Break();
                     CurTime = Global.theGame.Timer;
                     BreakTime = Rand.Float(60 * 5, 60 * 60);
-                    Global.NewWords("Warning: Machine Broken!");
-                    Global.MachineBroken = true;
+                    if (Global.MachineBrokenTime < 60*60*3)
+                    {
+                        Global.NewWords("Warning: " + Name + " Broken!");
+                        Global.MachineBroken = true;
+                    }
                 }
                 
 
@@ -87,9 +92,7 @@ namespace AGDSJam1
                 if(Global.theGame.Timer >= CurTime + FixTime)
                 {
                     Status = 1;
-                    CurTime = Global.theGame.Timer;
-                    Global.MachineBroken = false;
-                    Global.MachineBrokenTime -= 60 * 60 * 0.2f;
+                    
                 }
             }
         }
