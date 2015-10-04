@@ -24,6 +24,7 @@ namespace AGDSJam1
         public float Hunger;
         public bool NoShoes;
         public bool InsideShip;
+        public float howLongOutside;
         public bool Dead = false;
 
         // Fixed Inventory?
@@ -73,6 +74,7 @@ namespace AGDSJam1
             mySprite = new Spritemap<string>(Assets.GFX_PLAYER, 32, 32);
             mySprite.Add("idle", new int[] { 0 }, new float[] { 60.0f });
             mySprite.Add("run", new int[] { 0, 1, 2, 3, 4, 5 }, new float[] { 6f, 6f, 6f, 6f, 6f, 6f });
+            mySprite.Add("dead", new int[] { 6 }, new float[] { 6f });
             mySprite.Play("run");
             mySprite.CenterOrigin();
             AddGraphic(mySprite);
@@ -114,401 +116,471 @@ namespace AGDSJam1
         {
             myController = Global.thePlayerSession.GetController<ControllerXbox360>();
             Vector2 moveDelta = new Vector2();
-            if(InsideShip)
+            if (!Dead)
             {
-                moveDelta.X = myController.LeftStick.X * 0.1f;
-                moveDelta.Y = myController.LeftStick.Y * 0.1f;
-            }
 
-            // if LB down, render radial menu
-            RenderRadial = myController.LB.Down;
 
-            // if use item key is pressed, use an item -- select from radial if radial is used
-            if (myController.X.Pressed)
-            {
-                // Check for radial, select if it's on.
-                if (RenderRadial)
+                if (InsideShip)
                 {
-                    // get crosshair angle
-                    Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
-                    directionToXHair.Normalize();
-                    float AtanResult = (float)Math.Atan2(directionToXHair.X, directionToXHair.Y);
-                    if (AtanResult < 0)
-                    {
-                        AtanResult += 2 * (float)Math.PI;
-                    }
-                    float Ang = MathHelper.ToDegrees(AtanResult);
-                    Otter.Debugger.Instance.Log(Ang);
-                    // Get closest to ang
-                    float res = Ang / 360.0f;
-                    Otter.Debugger.Instance.Log(res * 10);
-                    int index = (int)Math.Round(res * 10);
+                    moveDelta.X = myController.LeftStick.X * 0.1f;
+                    moveDelta.Y = myController.LeftStick.Y * 0.1f;
+                }
 
-                    if(index == 10)
-                    {
-                        index = 0;
-                    }
-                    SelectedItem = index;
+                // if LB down, render radial menu
+                RenderRadial = myController.LB.Down;
 
+                // if use item key is pressed, use an item -- select from radial if radial is used
+                if (myController.X.Pressed)
+                {
+                    // Check for radial, select if it's on.
+                    if (RenderRadial)
+                    {
+                        // get crosshair angle
+                        Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
+                        directionToXHair.Normalize();
+                        float AtanResult = (float)Math.Atan2(directionToXHair.X, directionToXHair.Y);
+                        if (AtanResult < 0)
+                        {
+                            AtanResult += 2 * (float)Math.PI;
+                        }
+                        float Ang = MathHelper.ToDegrees(AtanResult);
+                        Otter.Debugger.Instance.Log(Ang);
+                        // Get closest to ang
+                        float res = Ang / 360.0f;
+                        Otter.Debugger.Instance.Log(res * 10);
+                        int index = (int)Math.Round(res * 10);
+
+                        if (index == 10)
+                        {
+                            index = 0;
+                        }
+                        SelectedItem = index;
+
+
+                    }
+                    else
+                    {
+                        // use the currently-held item
+                        switch (SelectedItem)
+                        {
+                            case 0:
+                                // Hands - Used to inspect an object.
+                                // Check for inspection target nearby, inspecting if necessary.
+                                if (crossHair.Overlap(crossHair.X, crossHair.Y, 6))
+                                {
+                                    //machine, display text in box.
+                                    Collider target = crossHair.Collide(crossHair.X, crossHair.Y, 6);
+                                    if (target.Entity.GetType().Name == "Machine")
+                                    {
+                                        Machine theMachine = (Machine)target.Entity;
+                                        Global.ResetBox = true;
+                                        Global.MsgString = theMachine.Name + ":\n" + theMachine.Description;
+                                        if (theMachine.Status == 2)
+                                        {
+                                            Global.MsgString += "\n" + theMachine.FlavBroke;
+                                        }
+                                        if (theMachine.Status == 3)
+                                        {
+                                            Global.MsgString += "\n" + theMachine.FlavFixing;
+                                        }
+
+                                        inspectMachine = theMachine;
+                                        RenderDetail = true;
+                                        StartInspect = Global.theGame.Timer;
+                                    }
+                                }
+                                // Check for inspection target nearby, inspecting if necessary.
+                                if (crossHair.Overlap(crossHair.X, crossHair.Y, 10))
+                                {
+                                    //machine, display text in box.
+                                    Collider target = crossHair.Collide(crossHair.X, crossHair.Y, 10);
+                                    if (target.Entity.GetType().Name == "Airlock")
+                                    {
+                                        Airlock theMachine = (Airlock)target.Entity;
+                                        if (!theMachine.Open)
+                                        {
+                                            theMachine.DoorOpen();
+                                            Global.NewWords("Opening Airlock...");
+                                        }
+                                        if (theMachine.Open)
+                                        {
+                                            theMachine.DoorClose();
+                                            Global.NewWords("Closing Airlock...");
+                                        }
+                                    }
+                                }
+                                // Pick up other items if there is room. 
+                                if (crossHair.Overlap(crossHair.X, crossHair.Y, 1))
+                                {
+                                    Collider target = crossHair.Collide(crossHair.X, crossHair.Y, 1);
+                                    if (target.Entity.GetType().Name == "Item")
+                                    {
+                                        Item theItem = (Item)target.Entity;
+
+                                        // get item based on type
+                                        switch (theItem.itemType)
+                                        {
+                                            case 1:
+                                                if (Boots < 1)
+                                                {
+                                                    theItem.RemoveSelf();
+                                                    Boots = 1;
+
+
+                                                }
+                                                else
+                                                {
+                                                    //can't pick up
+                                                }
+                                                break;
+                                            case 2:
+                                                if (Circuit < 5)
+                                                {
+                                                    theItem.RemoveSelf();
+                                                    Circuit += 1;
+
+                                                }
+                                                else
+                                                {
+                                                    //can't pick up
+                                                }
+                                                break;
+                                            case 3:
+                                                if (FloorTile < 5)
+                                                {
+                                                    theItem.RemoveSelf();
+                                                    FloorTile += 1;
+
+                                                }
+                                                else
+                                                {
+                                                    //can't pick up
+                                                }
+                                                break;
+                                            case 4:
+                                                if (Wrench < 1)
+                                                {
+                                                    theItem.RemoveSelf();
+                                                    Wrench = 1;
+
+                                                }
+                                                else
+                                                {
+                                                    //can't pick up
+                                                }
+                                                break;
+                                            case 5:
+                                                if (Battery < 1)
+                                                {
+                                                    theItem.RemoveSelf();
+                                                    Battery = 1;
+
+                                                }
+                                                else
+                                                {
+                                                    //can't pick up
+                                                }
+                                                break;
+                                            case 6:
+                                                if (Donut < 1)
+                                                {
+                                                    theItem.RemoveSelf();
+                                                    Donut = 1;
+
+                                                }
+                                                else
+                                                {
+                                                    //can't pick up
+                                                }
+                                                break;
+                                            case 7:
+                                                if (Crisps < 1)
+                                                {
+                                                    theItem.RemoveSelf();
+                                                    Crisps = 1;
+
+                                                }
+                                                else
+                                                {
+                                                    //can't pick up
+                                                }
+                                                break;
+                                            case 8:
+                                                if (FireExtinguisher < 1)
+                                                {
+                                                    theItem.RemoveSelf();
+                                                    FireExtinguisher = 1;
+
+                                                }
+                                                else
+                                                {
+                                                    //can't pick up
+                                                }
+                                                break;
+                                            case 9:
+                                                if (O2Tank < 1)
+                                                {
+                                                    theItem.RemoveSelf();
+                                                    O2Tank = 1;
+
+                                                }
+                                                else
+                                                {
+                                                    //can't pick up
+                                                }
+                                                break;
+                                        }
+
+
+                                    }
+
+                                }
+
+                                break;
+                            case 1:
+                                Global.NewWords("You grip your shoes like an idiot.");
+                                break;
+                            case 2:
+                                Global.NewWords("You hug the circuit board.\n It feels better.");
+                                break;
+                            case 3:
+                                Global.NewWords("These tiles weren't designed to\n be torn out of the flooring.");
+                                break;
+                            case 4:
+                                // wrench, fix things
+                                // Check for inspection target nearby, inspecting if necessary.
+                                if (crossHair.Overlap(crossHair.X, crossHair.Y, 6))
+                                {
+                                    //machine, display text in box.
+                                    Collider target = crossHair.Collide(crossHair.X, crossHair.Y, 6);
+                                    if (target.Entity.GetType().Name == "Machine")
+                                    {
+                                        Machine theMachine = (Machine)target.Entity;
+                                        if (theMachine.Status == 2)
+                                        {
+                                            theMachine.BeginFix();
+                                            if (theMachine.Name == "Vending Machine")
+                                            {
+                                                Global.NewWords("You set the machine to reboot.\nIt'll vend itself some new glass.");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Global.NewWords("If it ain't broke, don't fix it.");
+                                        }
+
+                                        inspectMachine = theMachine;
+                                        RenderDetail = true;
+                                        StartInspect = Global.theGame.Timer;
+
+
+
+                                    }
+                                }
+                                else
+                                {
+                                    Global.NewWords("You swing the wrench around.\n\nLike an idiot.");
+                                }
+                                break;
+
+                            default:
+                                //nada
+                                break;
+                        }
+                    }
 
                 }
-                else
+
+                // Item is thrown away or hands strike object
+                if (myController.B.Pressed)
                 {
-                    // use the currently-held item
                     switch (SelectedItem)
                     {
                         case 0:
-                            // Hands - Used to inspect an object.
-                            // Check for inspection target nearby, inspecting if necessary.
-                            if (crossHair.Overlap(crossHair.X, crossHair.Y, 6))
-                            {
-                                //machine, display text in box.
-                                Collider target = crossHair.Collide(crossHair.X, crossHair.Y, 6);
-                                if (target.Entity.GetType().Name == "Machine")
-                                {
-                                    Machine theMachine = (Machine)target.Entity;
-                                    Global.ResetBox = true;
-                                    Global.MsgString = theMachine.Name + ":\n" + theMachine.Description;
-                                    if(theMachine.Status == 2)
-                                    {
-                                        Global.MsgString += "\n" + theMachine.FlavBroke;
-                                    }
-                                    if(theMachine.Status == 3)
-                                    {
-                                        Global.MsgString += "\n" + theMachine.FlavFixing;
-                                    }
+                            // Percussive force! Wham!
+                            // Check for machine, shorten break  time.
+                            // Chance to fix?
+                            // If vending machine, chance to vend item instead of hurting it. 80% chance. 
 
-                                    inspectMachine = theMachine;
-                                    RenderDetail = true;
-                                    StartInspect = Global.theGame.Timer;
-                                }
-                            }
-                            // Pick up other items if there is room. 
-                            if(crossHair.Overlap(crossHair.X, crossHair.Y, 1))
-                            {
-                                Collider target = crossHair.Collide(crossHair.X, crossHair.Y, 1);
-                                if (target.Entity.GetType().Name == "Item")
-                                {
-                                    Item theItem = (Item)target.Entity;
-
-                                    // get item based on type
-                                    switch(theItem.itemType)
-                                    {
-                                        case 1:
-                                            if(Boots < 1)
-                                            {
-                                                theItem.RemoveSelf();
-                                                Boots = 1;
-                                                
-                                                
-                                            }
-                                            else
-                                            {
-                                                //can't pick up
-                                            }
-                                            break;
-                                        case 2:
-                                            if (Circuit < 5)
-                                            {
-                                                theItem.RemoveSelf();
-                                                Circuit += 1;
-
-                                            }
-                                            else
-                                            {
-                                                //can't pick up
-                                            }
-                                            break;
-                                        case 3:
-                                            if (FloorTile < 5)
-                                            {
-                                                theItem.RemoveSelf();
-                                                FloorTile += 1;
-
-                                            }
-                                            else
-                                            {
-                                                //can't pick up
-                                            }
-                                            break;
-                                        case 4:
-                                            if (Wrench < 1)
-                                            {
-                                                theItem.RemoveSelf();
-                                                Wrench = 1;
-
-                                            }
-                                            else
-                                            {
-                                                //can't pick up
-                                            }
-                                            break;
-                                        case 5:
-                                            if (Battery < 1)
-                                            {
-                                                theItem.RemoveSelf();
-                                                Battery = 1;
-
-                                            }
-                                            else
-                                            {
-                                                //can't pick up
-                                            }
-                                            break;
-                                        case 6:
-                                            if (Donut < 1)
-                                            {
-                                                theItem.RemoveSelf();
-                                                Donut = 1;
-
-                                            }
-                                            else
-                                            {
-                                                //can't pick up
-                                            }
-                                            break;
-                                        case 7:
-                                            if (Crisps < 1)
-                                            {
-                                                theItem.RemoveSelf();
-                                                Crisps = 1;
-
-                                            }
-                                            else
-                                            {
-                                                //can't pick up
-                                            }
-                                            break;
-                                        case 8:
-                                            if (FireExtinguisher < 1)
-                                            {
-                                                theItem.RemoveSelf();
-                                                FireExtinguisher = 1;
-
-                                            }
-                                            else
-                                            {
-                                                //can't pick up
-                                            }
-                                            break;
-                                        case 9:
-                                            if (O2Tank < 1)
-                                            {
-                                                theItem.RemoveSelf();
-                                                O2Tank = 1;
-
-                                            }
-                                            else
-                                            {
-                                                //can't pick up
-                                            }
-                                            break;
-                                    }
-
-                                   
-                                }
-
-                            }
 
                             break;
+                        case 1:
+                            // Take off your hat, kick off your shoes...
+                            if (Boots > 0)
+                            {
+                                Boots = 0;
+                                Item newItem = new Item(X, Y, SelectedItem);
+                                this.Scene.Add(newItem);
+                                Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
+                                directionToXHair.Normalize();
+                                newItem.Throw(directionToXHair);
+                                if (!InsideShip)
+                                {
+                                    mySpeed.X = -directionToXHair.X;
+                                    mySpeed.Y = -directionToXHair.Y;
+                                }
+                                SelectedItem = 0;
+                            }
+                            // ... i know you ain't goin anywhere
+                            break;
+                        case 2:
+                            // Take off your hat, kick off your shoes...
+                            if (Circuit > 0)
+                            {
+                                Circuit -= 1;
+                                Item newItem = new Item(X, Y, SelectedItem);
+                                this.Scene.Add(newItem);
+                                Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
+                                directionToXHair.Normalize();
+                                newItem.Throw(directionToXHair);
+                                if (!InsideShip)
+                                {
+                                    mySpeed.X = -directionToXHair.X;
+                                    mySpeed.Y = -directionToXHair.Y;
+                                }
+                                SelectedItem = 0;
+                            }
+                            // ... i know you ain't goin anywhere
+                            break;
+                        case 3:
+                            // Take off your hat, kick off your shoes...
+                            if (FloorTile > 0)
+                            {
+                                FloorTile -= 1;
+                                Item newItem = new Item(X, Y, SelectedItem);
+                                this.Scene.Add(newItem);
+                                Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
+                                directionToXHair.Normalize();
+                                newItem.Throw(directionToXHair);
+                                if (!InsideShip)
+                                {
+                                    mySpeed.X = -directionToXHair.X;
+                                    mySpeed.Y = -directionToXHair.Y;
+                                }
+                                SelectedItem = 0;
+                            }
+                            // ... i know you ain't goin anywhere
+                            break;
+                        case 4:
+                            // Take off your hat, kick off your shoes...
+                            if (Wrench > 0)
+                            {
+                                Wrench = 0;
+                                Item newItem = new Item(X, Y, SelectedItem);
+                                this.Scene.Add(newItem);
+                                Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
+                                directionToXHair.Normalize();
+                                newItem.Throw(directionToXHair);
+                                if (!InsideShip)
+                                {
+                                    mySpeed.X = -directionToXHair.X;
+                                    mySpeed.Y = -directionToXHair.Y;
+                                }
+                                SelectedItem = 0;
+                            }
+                            // ... i know you ain't goin anywhere
+                            break;
+                        case 5:
+                            // Take off your hat, kick off your shoes...
+                            if (Battery > 0)
+                            {
+                                Battery = 0;
+                                Item newItem = new Item(X, Y, SelectedItem);
+                                this.Scene.Add(newItem);
+                                Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
+                                directionToXHair.Normalize();
+                                newItem.Throw(directionToXHair);
+                                if (!InsideShip)
+                                {
+                                    mySpeed.X = -directionToXHair.X;
+                                    mySpeed.Y = -directionToXHair.Y;
+                                }
+                                SelectedItem = 0;
+                            }
+                            // ... i know you ain't goin anywhere
+                            break;
+                        case 6:
+                            // Take off your hat, kick off your shoes...
+                            if (Donut > 0)
+                            {
+                                Donut = 0;
+                                Item newItem = new Item(X, Y, SelectedItem);
+                                this.Scene.Add(newItem);
+                                Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
+                                directionToXHair.Normalize();
+                                newItem.Throw(directionToXHair);
+                                if (!InsideShip)
+                                {
+                                    mySpeed.X = -directionToXHair.X;
+                                    mySpeed.Y = -directionToXHair.Y;
+                                }
+                                SelectedItem = 0;
+                            }
+                            // ... i know you ain't goin anywhere
+                            break;
+                        case 7:
+                            // Take off your hat, kick off your shoes...
+                            if (Crisps > 0)
+                            {
+                                Crisps = 0;
+                                Item newItem = new Item(X, Y, SelectedItem);
+                                this.Scene.Add(newItem);
+                                Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
+                                directionToXHair.Normalize();
+                                newItem.Throw(directionToXHair);
+                                if (!InsideShip)
+                                {
+                                    mySpeed.X = -directionToXHair.X;
+                                    mySpeed.Y = -directionToXHair.Y;
+                                }
+                                SelectedItem = 0;
+                            }
+                            // ... i know you ain't goin anywhere
+                            break;
+                        case 8:
+                            // Take off your hat, kick off your shoes...
+                            if (FireExtinguisher > 0)
+                            {
+                                FireExtinguisher = 0;
+                                Item newItem = new Item(X, Y, SelectedItem);
+                                this.Scene.Add(newItem);
+                                Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
+                                directionToXHair.Normalize();
+                                newItem.Throw(directionToXHair);
+                                if (!InsideShip)
+                                {
+                                    mySpeed.X = -directionToXHair.X;
+                                    mySpeed.Y = -directionToXHair.Y;
+                                }
+                                SelectedItem = 0;
+                            }
+                            // ... i know you ain't goin anywhere
+                            break;
+                        case 9:
+                            // Take off your hat, kick off your shoes...
+                            if (O2Tank > 0)
+                            {
+                                O2Tank = 0;
+                                Item newItem = new Item(X, Y, SelectedItem);
+                                this.Scene.Add(newItem);
+                                Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
+                                directionToXHair.Normalize();
+                                newItem.Throw(directionToXHair);
+                                if (!InsideShip)
+                                {
+                                    mySpeed.X = -directionToXHair.X;
+                                    mySpeed.Y = -directionToXHair.Y;
+                                }
+                                SelectedItem = 0;
+                            }
+                            // ... i know you ain't goin anywhere
+                            break;
                         default:
-                            //nada
                             break;
                     }
                 }
 
             }
-
-            // Item is thrown away or hands strike object
-            if(myController.B.Pressed)
-            {
-                switch(SelectedItem)
-                {
-                    case 0:
-                        // Percussive force! Wham!
-                        // Check for machine, shorten break  time.
-                        // Chance to fix?
-                        // If vending machine, chance to vend item instead of hurting it. 80% chance. 
-
-
-                        break;
-                    case 1:
-                        // Take off your hat, kick off your shoes...
-                        if (Boots > 0)
-                        {
-                            Boots = 0;
-                            Item newItem = new Item(X, Y, SelectedItem);
-                            this.Scene.Add(newItem);
-                            Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
-                            directionToXHair.Normalize();
-                            newItem.Throw(directionToXHair);
-                            if(!InsideShip)
-                            {
-                                mySpeed.X = -directionToXHair.X;
-                                mySpeed.Y = -directionToXHair.Y;
-                            }
-                            SelectedItem = 0;
-                        }
-                        // ... i know you ain't goin anywhere
-                        break;
-                    case 2:
-                        // Take off your hat, kick off your shoes...
-                        if (Circuit > 0)
-                        {
-                            Circuit -= 1;
-                            Item newItem = new Item(X, Y, SelectedItem);
-                            this.Scene.Add(newItem);
-                            Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
-                            directionToXHair.Normalize();
-                            newItem.Throw(directionToXHair);
-                            if (!InsideShip)
-                            {
-                                mySpeed.X = -directionToXHair.X;
-                                mySpeed.Y = -directionToXHair.Y;
-                            }
-                            SelectedItem = 0;
-                        }
-                        // ... i know you ain't goin anywhere
-                        break;
-                    case 3:
-                        // Take off your hat, kick off your shoes...
-                        if (FloorTile > 0)
-                        {
-                            FloorTile -= 1;
-                            Item newItem = new Item(X, Y, SelectedItem);
-                            this.Scene.Add(newItem);
-                            Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
-                            directionToXHair.Normalize();
-                            newItem.Throw(directionToXHair);
-                            if (!InsideShip)
-                            {
-                                mySpeed.X = -directionToXHair.X;
-                                mySpeed.Y = -directionToXHair.Y;
-                            }
-                            SelectedItem = 0;
-                        }
-                        // ... i know you ain't goin anywhere
-                        break;
-                    case 4:
-                        // Take off your hat, kick off your shoes...
-                        if (Wrench > 0)
-                        {
-                            Wrench = 0;
-                            Item newItem = new Item(X, Y, SelectedItem);
-                            this.Scene.Add(newItem);
-                            Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
-                            directionToXHair.Normalize();
-                            newItem.Throw(directionToXHair);
-                            if (!InsideShip)
-                            {
-                                mySpeed.X = -directionToXHair.X;
-                                mySpeed.Y = -directionToXHair.Y;
-                            }
-                            SelectedItem = 0;
-                        }
-                        // ... i know you ain't goin anywhere
-                        break;
-                    case 5:
-                        // Take off your hat, kick off your shoes...
-                        if (Battery > 0)
-                        {
-                            Battery = 0;
-                            Item newItem = new Item(X, Y, SelectedItem);
-                            this.Scene.Add(newItem);
-                            Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
-                            directionToXHair.Normalize();
-                            newItem.Throw(directionToXHair);
-                            if (!InsideShip)
-                            {
-                                mySpeed.X = -directionToXHair.X;
-                                mySpeed.Y = -directionToXHair.Y;
-                            }
-                            SelectedItem = 0;
-                        }
-                        // ... i know you ain't goin anywhere
-                        break;
-                    case 6:
-                        // Take off your hat, kick off your shoes...
-                        if (Donut > 0)
-                        {
-                            Donut = 0;
-                            Item newItem = new Item(X, Y, SelectedItem);
-                            this.Scene.Add(newItem);
-                            Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
-                            directionToXHair.Normalize();
-                            newItem.Throw(directionToXHair);
-                            if (!InsideShip)
-                            {
-                                mySpeed.X = -directionToXHair.X;
-                                mySpeed.Y = -directionToXHair.Y;
-                            }
-                            SelectedItem = 0;
-                        }
-                        // ... i know you ain't goin anywhere
-                        break;
-                    case 7:
-                        // Take off your hat, kick off your shoes...
-                        if (Crisps > 0)
-                        {
-                            Crisps = 0;
-                            Item newItem = new Item(X, Y, SelectedItem);
-                            this.Scene.Add(newItem);
-                            Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
-                            directionToXHair.Normalize();
-                            newItem.Throw(directionToXHair);
-                            if (!InsideShip)
-                            {
-                                mySpeed.X = -directionToXHair.X;
-                                mySpeed.Y = -directionToXHair.Y;
-                            }
-                            SelectedItem = 0;
-                        }
-                        // ... i know you ain't goin anywhere
-                        break;
-                    case 8:
-                        // Take off your hat, kick off your shoes...
-                        if (FireExtinguisher > 0)
-                        {
-                            FireExtinguisher = 0;
-                            Item newItem = new Item(X, Y, SelectedItem);
-                            this.Scene.Add(newItem);
-                            Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
-                            directionToXHair.Normalize();
-                            newItem.Throw(directionToXHair);
-                            if (!InsideShip)
-                            {
-                                mySpeed.X = -directionToXHair.X;
-                                mySpeed.Y = -directionToXHair.Y;
-                            }
-                            SelectedItem = 0;
-                        }
-                        // ... i know you ain't goin anywhere
-                        break;
-                    case 9:
-                        // Take off your hat, kick off your shoes...
-                        if (O2Tank > 0)
-                        {
-                            O2Tank = 0;
-                            Item newItem = new Item(X, Y, SelectedItem);
-                            this.Scene.Add(newItem);
-                            Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
-                            directionToXHair.Normalize();
-                            newItem.Throw(directionToXHair);
-                            if (!InsideShip)
-                            {
-                                mySpeed.X = -directionToXHair.X;
-                                mySpeed.Y = -directionToXHair.Y;
-                            }
-                            SelectedItem = 0;
-                        }
-                        // ... i know you ain't goin anywhere
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            
             MoveInDirection(moveDelta);
 
 
@@ -545,11 +617,27 @@ namespace AGDSJam1
         public override void Update()
         { 
             base.Update();
-
+            
             HandleInput();
+            
 
             // not on floor, not inside!
             InsideShip = Overlap(X, Y, 8);
+
+            if(!InsideShip)
+            {
+                howLongOutside++;
+            }
+            else
+            {
+                howLongOutside = 0;
+            }
+
+            if(howLongOutside > 600 && !Dead)
+            {
+                Dead = true;
+                Global.NewWords("Drifting endlessly among the stars,\nyou wonder what life had in store\nhad you not been...\n. . . . . . . . . . . . . . .\nan idiot.");
+            }
 
             if (Overlap(X + mySpeed.X, Y + mySpeed.Y, 3))
             {
@@ -567,6 +655,33 @@ namespace AGDSJam1
 
             }
 
+            if (Overlap(X + mySpeed.X, Y + mySpeed.Y, 10))
+            {
+                Collider target = Collide(X + mySpeed.X, Y + mySpeed.Y, 10);
+                if(target.Entity.GetType().Name == "Airlock")
+                {
+                    Airlock theAirlock = (Airlock)target.Entity;
+
+                    if(!theAirlock.Open)
+                    {
+                        //try just xspeed
+                        if (Overlap(X + mySpeed.X, Y, 10))
+                        {
+                            mySpeed.X = 0;
+                        }
+                        if (Overlap(X, mySpeed.Y + Y, 10))
+                        {
+                            mySpeed.Y = 0;
+                        }
+                    }
+
+                  
+                }
+
+
+
+            }
+
             X += mySpeed.X;
             Y += mySpeed.Y;
  
@@ -575,10 +690,18 @@ namespace AGDSJam1
             crossHair.Y = Y + (Input.GameMouseY - 240) / 2;
 
             // rotate to face crosshair
-            Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
-            directionToXHair.Normalize();
-            Graphic.Angle = 270 + (float)Math.Atan2(-directionToXHair.Y, directionToXHair.X) * 180.0f / (float)Math.PI;
+            if (!Dead)
+            {
 
+
+                Vector2 directionToXHair = new Vector2(crossHair.X - X, crossHair.Y - Y);
+                directionToXHair.Normalize();
+                Graphic.Angle = 270 + (float)Math.Atan2(-directionToXHair.Y, directionToXHair.X) * 180.0f / (float)Math.PI;
+            }
+            else if(!InsideShip)
+            {
+                Graphic.Angle += 1.0f;
+            }
             
 
         }
@@ -588,7 +711,7 @@ namespace AGDSJam1
             base.UpdateLast();
 
             // animate if moving
-            if ((Math.Abs(mySpeed.X) > 0.3f) || (Math.Abs(mySpeed.Y) > 0.3f))
+            if (((Math.Abs(mySpeed.X) > 0.3f) || (Math.Abs(mySpeed.Y) > 0.3f)) && !Dead)
             {
                 if (mySprite.CurrentAnim != "run")
                 {
@@ -596,9 +719,13 @@ namespace AGDSJam1
                 }
                 
             }
-            else
+            else if(!Dead)
             {
                 mySprite.Play("idle");
+            }
+            else
+            {
+                mySprite.Play("dead");
             }
 
             

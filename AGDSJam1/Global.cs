@@ -13,6 +13,8 @@ namespace AGDSJam1
         public static ControllerXbox360 controllerPlayerOne;
         public static string MsgString = "Subject awakened.";
         public static bool ResetBox = true;
+        public static bool MachineBroken = true;
+        public static float MachineBrokenTime = 0;
 
         public static void NewWords(string msg)
         {

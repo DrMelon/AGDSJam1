@@ -53,7 +53,11 @@ namespace AGDSJam1
 
         public void BeginFix()
         {
-            Status = 3;
+            if(Status == 2)
+            {
+                Status = 3;
+            }
+            
 
         }
 
@@ -72,6 +76,8 @@ namespace AGDSJam1
                     Break();
                     CurTime = Global.theGame.Timer;
                     BreakTime = Rand.Float(60 * 5, 60 * 60);
+                    Global.NewWords("Warning: Machine Broken!");
+                    Global.MachineBroken = true;
                 }
                 
 
@@ -82,6 +88,8 @@ namespace AGDSJam1
                 {
                     Status = 1;
                     CurTime = Global.theGame.Timer;
+                    Global.MachineBroken = false;
+                    Global.MachineBrokenTime -= 60 * 60 * 0.2f;
                 }
             }
         }

@@ -118,8 +118,20 @@ namespace AGDSJam1
                 }
                 if (curObj.Name == "VendingMachine")
                 {
-                    Machine newMachine = new Machine(curObj.X, curObj.Y, "Vending Machine", "Full of delicious snacks.", "Looks like it's busted.", "It's rebooting.", 60, Assets.GFX_MACHINETOP, Assets.GFX_VENDING);
+                    Machine newMachine = new Machine(curObj.X, curObj.Y, "Vending Machine", "Full of delicious snacks.", "Looks like it's busted.", "It's rebooting.", 300, Assets.GFX_MACHINETOP, Assets.GFX_VENDING);
                     Add(newMachine);
+                }
+                if (curObj.Type == "AirlockVert")
+                {
+                    Airlock newAirlock = new Airlock(curObj.X, curObj.Y, true);
+                    Add(newAirlock);
+
+                }
+                if (curObj.Type == "AirlockHoriz")
+                {
+                    Airlock newAirlock = new Airlock(curObj.X, curObj.Y, false);
+                    Add(newAirlock);
+
                 }
             }
 
@@ -193,6 +205,19 @@ namespace AGDSJam1
             }
 
             bip--;
+
+            if(Global.MachineBroken)
+            {
+                Global.MachineBrokenTime++;
+                if (Global.MachineBrokenTime > 60 * 60 * 3)
+                {
+                    if (!thePlayer.Dead)
+                    {
+                        thePlayer.Dead = true;
+                        Global.NewWords("You neglected to fix the machines.\nThey were all vital to life support.\nEven the vending machine.");
+                    }
+                }
+            }
 
         }
 

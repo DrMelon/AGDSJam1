@@ -31,6 +31,8 @@ namespace AGDSJam1
         public static string GFX_WRENCH = "../../Assets/wrench.png";
         public static string GFX_MACHINETOP = "../../Assets/machinefromabove.png";
         public static string GFX_VENDING = "../../Assets/vendingmachine.png";
+        public static string GFX_AIRLOCKH = "../../Assets/airlock2.png";
+        public static string GFX_AIRLOCKV = "../../Assets/airlock.png";
 
     }
 }
