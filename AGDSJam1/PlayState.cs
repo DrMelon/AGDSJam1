@@ -87,17 +87,35 @@ namespace AGDSJam1
             TiledObjectGroup mapObjects = (TiledObjectGroup)mapProject.Layers[2];
             TiledObject strt = mapObjects.Objects[0];
 
+            // Make machines
+
+
+
+
             CameraX = strt.X - 320;
             CameraY = strt.Y - 240;
 
             // Add player
             thePlayer = new Player(strt.X, strt.Y);
+            thePlayer.Layer = 20;
 
 
             // Add station & player to scene
             
             AddGraphic(floorTiles);
             Add(thePlayer);
+
+            // Make items
+            for (int i = 0; i < mapObjects.Objects.Count; i++)
+            {
+                TiledObject curObj = mapObjects.Objects[i];
+                if (curObj.Name == "Wrench")
+                {
+                    Item newWrench = new Item(curObj.X, curObj.Y, 4);
+                    Add(newWrench);
+                }
+            }
+
             AddGraphic(wallTiles);
             Add(thePlayer.crossHair);
 
@@ -112,13 +130,25 @@ namespace AGDSJam1
             msgBox.CenterOrigin();
             msgBox.X = 320;
             msgBox.Y = 250 + msgBox.Height + 16;
-            AddGraphic(msgBox);
+            Entity hud1 = new Entity();
+        
+            hud1.AddGraphic(msgBox);
+            hud1.Layer = 10;
+            Add(hud1);
 
-            msgText = new RichText("{shake:0.4}Subject awakened.\nFacility status: {color:00ff00}   [OK]\n{color:ffffff}Subject status: {color:00ff00}    [OK]\n{color:ffffff}HERMES-I stability: {color:ff0000}[POOR]", Assets.FONT_MSG, 8, 270, 50);
+
+            msgText = new RichText("", Assets.FONT_MSG, 8, 270, 50);
+            msgText.DefaultShakeX = 0.4f;
+            msgText.DefaultShakeY = 0.4f;
             msgText.X = 325 - msgBox.HalfWidth;
             msgText.Y = 250 + msgBox.Height - 8;
             msgText.Scroll = 0;
-            AddGraphic(msgText);
+            msgText.String = "Subject awakened.";
+            Entity hud2 = new Entity();
+
+            hud2.AddGraphic(msgText);
+            hud2.Layer = 5;
+            Add(hud2);
             
 
         }
