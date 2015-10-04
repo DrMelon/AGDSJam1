@@ -12,7 +12,7 @@ namespace AGDSJam1
         static void Main(string[] args)
         {
 
-            Global.theGame = new Game("AGDSJam1", 640, 480, 60, false);
+            Global.theGame = new Game("SPACE QUESTIONMARK", 640, 480, 60, false);
             
             Global.thePlayerSession = Global.theGame.AddSession("PlayerOne");
             Global.thePlayerSession.Controller = new ControllerXbox360(0);

@@ -245,7 +245,7 @@ namespace AGDSJam1
         {
             Global.MachineBroken = false;
             Global.MachineBrokenTime = 0;
-            Global.MsgString = "You wake up.\nPress W, S, A, D to move.\nInteract / Use Item with Left Mouse\nThrow Item with Right Mouse.\nRepair your machines!";
+            Global.MsgString = "You wake up.\nPress W, S, A, D to move.\nInteract / Use Item with Left Mouse\nThrow Item with Right Mouse.\nHold Q to open item menu.\nRepair your machines!";
             Global.theGame.Surface.ClearShaders();
             Global.theGame.SwitchScene(new PlayState());
         }
