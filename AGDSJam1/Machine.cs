@@ -19,6 +19,7 @@ namespace AGDSJam1
         float CurTime;
         public int Status;
         bool BeingInspected;
+        Entity myFire = null;
 
         public Machine(float x, float y, string machineName, string description, string flav_broke, string flav_fixin, float fixtime, string asset_top, string asset_detail)
         {
@@ -66,6 +67,14 @@ namespace AGDSJam1
         public void Break()
         {
             Status = 2;
+            Spritemap<string> newMap = new Spritemap<string>(Assets.GFX_FIRE, 64, 64);
+            newMap.Add("fire", new Anim(new int[] { 0, 1, 2, 3, 4 }, new float[] { 3f }));
+            newMap.Play("fire");
+            myFire = new Entity(X, Y, newMap);
+            myFire.Graphic.CenterOrigin();
+            myFire.Graphic.Shake = 4;
+            myFire.Layer = 20;
+            this.Scene.Add(myFire);
         }
 
         public override void Update()
@@ -83,6 +92,7 @@ namespace AGDSJam1
                         Global.NewWords("Warning: " + Name + " Broken!");
                         Global.MachineBroken = true;
                     }
+
                 }
                 
 
@@ -92,7 +102,12 @@ namespace AGDSJam1
                 if(Global.theGame.Timer >= CurTime + FixTime)
                 {
                     Status = 1;
-                    
+
+                }
+                if (myFire != null)
+                {
+                    myFire.RemoveSelf();
+                    myFire = null;
                 }
             }
         }
